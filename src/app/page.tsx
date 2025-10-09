@@ -1,103 +1,150 @@
+import { BackgroundGradient } from "@/components/ui/background-gradient";
+import ParticleBackground from "@/components/ui/particle-background";
+import fetchContentType from "@/lib/strapi/fetchContentType";
 import Image from "next/image";
+import { AnimatedGradientText } from "@/components/ui/animated-gradient-text";
+import { Github, Linkedin, FileText, Mail, Download } from "lucide-react";
+import { GradientIconLink } from "@/components/ui/gradient-icon-link";
+import ArrowAnimation from "@/components/ui/arrow-animation";
+import ScrollProgressIndicator from "@/components/ui/scroll-indicator";
+import { PortfolioNavbar } from "@/components/ui/portfolio-navbar";
 
-export default function Home() {
+export default async function Home() {
+  // Fetch Global with nested populate
+  const data = await fetchContentType(
+    "global",
+    { populate: { personnelInformations: { populate: "*" } } },
+    true,
+  );
+
+  // Safely resolve image URL from Strapi response
+  const info = data?.personnelInformations;
+  const image = info?.image;
+  const formats = image?.formats;
+  const best = formats?.medium ?? formats?.small ?? formats?.thumbnail ?? image;
+  const relUrl: string | undefined = best?.url;
+  const base = process.env.NEXT_PUBLIC_API_URL;
+
+  let src = "";
+  try {
+    if (relUrl && base) src = new URL(relUrl, base).href;
+    else if (typeof relUrl === "string") src = relUrl; // if already absolute
+  } catch {
+    // leave empty to trigger fallback
+  }
+
+  // Prefer known dimensions from selected format
+  const width = best?.width ?? image?.width ?? 400;
+  const height = best?.height ?? image?.height ?? 500;
+
+  // Get logo URL from personnelInformations
+  const logo = info?.logo;
+  const logoUrl = logo?.url;
+  let logoSrc = "";
+  try {
+    if (logoUrl && base) logoSrc = new URL(logoUrl, base).href;
+    else if (typeof logoUrl === "string") logoSrc = logoUrl;
+  } catch {
+    // leave empty to use fallback
+  }
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <>
+      <ParticleBackground />
+      <PortfolioNavbar logoSrc={logoSrc} logoAlt={logo?.alternativeText || logo?.name || "Logo"} />
+      <main className="min-h-dvh w-full relative z-10 flex items-start justify-center p-4 sm:p-8 pt-32">
+        <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          {/* Left: Rotated info on md+; normal on mobile */}
+          <div className="relative md:min-h-[65vh]">
+            <div className="mx-auto md:mx-0 max-w-2xl md:absolute md:left-0 md:top-1/2 md:-translate-y-1/2">
+              <AnimatedGradientText className="text-6xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight leading-tight">
+                {info ? `${info.firstName} ${info.lastName}` : "Your Name"}
+              </AnimatedGradientText>
+              <p className="mt-3 text-white/80 text-3xl font-bold">
+                {info?.currentRole ?? "Your current role"}
+              </p>
+              <p className="mt-5 text-white/70 text-xl sm:text-2xl max-w-prose">
+                {info?.shortDescription ?? "Short description about you."}
+              </p>
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                {info?.github && (
+                  <GradientIconLink
+                    href={info.github}
+                    label="GitHub"
+                  >
+                    <Github strokeWidth={1.5} />
+                  </GradientIconLink>
+                )}
+                {info?.linkedin && (
+                  <GradientIconLink
+                    href={info.linkedin}
+                    label="LinkedIn"
+                  >
+                    <Linkedin strokeWidth={1.5} />
+                  </GradientIconLink>
+                )}
+                {info?.resume?.url && (
+                  <a
+                    href={base ? new URL(info.resume.url, base).href : info.resume.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-8 py-4 rounded-full bg-gradient-to-r from-gradient-primary to-gradient-secondary text-white hover:shadow-lg hover:shadow-gradient-primary/50 transition-all text-xl font-bold flex items-center gap-2"
+                  >
+                    <Download className="w-5 h-5" strokeWidth={2.5} />
+                    Download Resume
+                  </a>
+                )}
+                {info?.email && (
+                  <a
+                    href={`mailto:${info.email}`}
+                    className="px-6 py-3 rounded-md bg-neutral-800 text-white hover:bg-neutral-700 transition border border-white/10 md:hidden text-lg"
+                  >
+                    {info.email}
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          {/* Right: Profile image with gradient border + glow */}
+          <div className="flex justify-center md:justify-end">
+            {src ? (
+              <BackgroundGradient
+                containerClassName="w-full max-w-xs sm:max-w-sm"
+                className="rounded-[2rem] bg-background overflow-hidden"
+              >
+                <Image
+                  src={src}
+                  width={width}
+                  height={height}
+                  alt={image?.alternativeText || image?.name || "Profile image"}
+                  className="w-full h-auto object-contain"
+                  priority
+                />
+              </BackgroundGradient>
+            ) : (
+              <div className="w-full max-w-sm sm:max-w-md rounded-3xl p-6 text-center text-white/80">
+                <p className="text-base">No image available.</p>
+                <p className="text-sm text-white/50 mt-1">
+                  Ensure NEXT_PUBLIC_API_URL is set and Strapi is running.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
+        {/* Rotated email along left border on md+ */}
+        {info?.email && (
+          <a
+            href={`mailto:${info.email}`}
+            className="hidden md:flex fixed left-4 top-[85%] -translate-y-1/2 -rotate-90 origin-left text-white/70 hover:text-white transition-colors z-20 tracking-widest uppercase text-xs"
+            aria-label={`Email ${info.firstName} ${info.lastName}`}
+          >
+            {info.email}
+          </a>
+        )}
+        <ArrowAnimation />
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      <ScrollProgressIndicator />
+    </>
   );
 }
