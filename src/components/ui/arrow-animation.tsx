@@ -7,7 +7,11 @@ import { useRef } from 'react';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-const ArrowAnimation = () => {
+type ArrowAnimationProps = {
+    className?: string;
+};
+
+const ArrowAnimation = ({ className }: ArrowAnimationProps) => {
     const svgRef = useRef<SVGSVGElement>(null);
     const arrow1Ref = useRef<SVGPathElement>(null);
     const arrow2Ref = useRef<SVGPathElement>(null);
@@ -54,7 +58,7 @@ const ArrowAnimation = () => {
             viewBox="0 0 376 111"
             fill="transparent"
             xmlns="http://www.w3.org/2000/svg"
-            className="absolute bottom-32 left-1/2 -translate-x-1/2 z-0"
+            className={className ?? "absolute bottom-32 left-1/2 -translate-x-1/2 z-0"}
             ref={svgRef}
         >
             <path
