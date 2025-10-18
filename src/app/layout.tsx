@@ -6,6 +6,7 @@ import { PortfolioNavbar } from "@/components/ui/portfolio-navbar";
 import ScrollProgressIndicator from "@/components/ui/scroll-indicator";
 import fetchContentType from "@/lib/strapi/fetchContentType";
 import LayoutPreloader from "@/components/ui/layout-preloader";
+import PageTransition from "@/components/ui/page-transition";
 
 
 const geistSans = Geist({
@@ -62,7 +63,9 @@ export default async function RootLayout({
             {info.email}
           </a>
         )}
-        {children}
+        <PageTransition>
+          {children}
+        </PageTransition>
         <ScrollProgressIndicator />
       </body>
     </html>

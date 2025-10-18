@@ -6,7 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import { useRef, useState, MouseEvent } from "react";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
+import TransitionLink from "@/components/ui/transition-link";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -114,7 +114,7 @@ const ProjectItem = ({ index, project, selectedProject, onMouseEnter, onMouseLea
   const fullImageUrl = imageUrl ? (imageUrl.startsWith("http") ? imageUrl : `${base}${imageUrl}`) : "";
 
   return (
-    <Link
+    <TransitionLink
       href={`/projects/${project.slug}`}
       className="project-item group leading-none py-5 md:border-b border-white/10 first:!pt-0 last:pb-0 last:border-none md:group-hover/projects:opacity-30 md:hover:!opacity-100 transition-all cursor-pointer block"
       onMouseEnter={handleMouseEnter}
@@ -170,7 +170,7 @@ const ProjectItem = ({ index, project, selectedProject, onMouseEnter, onMouseLea
           </div>
         </div>
       </div>
-    </Link>
+    </TransitionLink>
   );
 };
 
