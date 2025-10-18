@@ -5,7 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import TransitionLink from "@/components/ui/transition-link";
 import { useRef } from "react";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -131,13 +131,13 @@ export default function ProjectDetailsClient({ project }: ProjectDetailsClientPr
   return (
     <section className="pt-32 pb-14">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-8" ref={containerRef}>
-        <Link
-          href="/#projects"
+        <TransitionLink
+          href="/"
           className="mb-16 inline-flex gap-2 items-center group h-12 text-white/70 hover:text-white transition-colors"
         >
           <ArrowLeft className="group-hover:-translate-x-1 group-hover:text-gradient-primary transition-all duration-300" />
           Back to Projects
-        </Link>
+        </TransitionLink>
 
         <div className="top-0 min-h-[calc(100svh-100px)] flex" id="info">
           <div className="relative w-full">
