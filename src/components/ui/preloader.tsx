@@ -5,43 +5,48 @@ import React, { useRef } from 'react';
 
 gsap.registerPlugin(useGSAP);
 
-const Preloader = () => {
-    const preloaderRef = useRef<HTMLDivElement>(null);
+type PreloaderProps = { active?: boolean; onDone?: () => void };
 
-    useGSAP(
-        () => {
-            const tl = gsap.timeline({
-                defaults: {
-                    ease: 'power1.inOut',
-                },
-            });
+const Preloader = ({ active = true, onDone }: PreloaderProps) => {
+  const preloaderRef = useRef<HTMLDivElement>(null);
 
-            tl.to('.name-text span', {
-                y: 0,
-                stagger: 0.05,
-                duration: 0.2,
-            });
+  if (!active) return null;
 
-            tl.to('.preloader-item', {
-                delay: 1,
-                y: '100%',
-                duration: 0.5,
-                stagger: 0.1,
-            })
-                .to('.name-text span', { autoAlpha: 0 }, '<0.5')
-                .to(
-                    preloaderRef.current,
-                    {
-                        autoAlpha: 0,
-                    },
-                    '<1',
-                );
+  useGSAP(
+    () => {
+      const tl = gsap.timeline({
+        defaults: {
+          ease: 'power1.inOut',
         },
-        { scope: preloaderRef },
-    );
+      });
 
-    return (
-        <div className="fixed inset-0 z-[50] flex" ref={preloaderRef}>
+      tl.to('.name-text span', {
+        y: 0,
+        stagger: 0.05,
+        duration: 0.2,
+      });
+
+      tl.to('.preloader-item', {
+        delay: 1,
+        y: '100%',
+        duration: 0.5,
+        stagger: 0.1,
+      })
+        .to('.name-text span', { autoAlpha: 0 }, '<0.5')
+        .to(
+          preloaderRef.current,
+          {
+            autoAlpha: 0,
+            onComplete: () => onDone?.(),
+          },
+          '<1',
+        );
+    },
+    { scope: preloaderRef },
+  );
+
+  return (
+    <div className="fixed inset-0 z-[50] flex" ref={preloaderRef}>
             <div className="preloader-item h-full w-[10%] bg-black"></div>
             <div className="preloader-item h-full w-[10%] bg-black"></div>
             <div className="preloader-item h-full w-[10%] bg-black"></div>
@@ -67,7 +72,7 @@ const Preloader = () => {
                 <span className="inline-block translate-y-full">I</span>
             </p>
         </div>
-    );
+  );
 };
 
 export default Preloader;

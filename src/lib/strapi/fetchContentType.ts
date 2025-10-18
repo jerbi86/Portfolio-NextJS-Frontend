@@ -31,8 +31,20 @@ export default async function fetchContentType(
   contentType: string,
   params: Record<string, unknown> = {},
   spreadData?: boolean,
+  skipDraftMode?: boolean,
 ): Promise<any> {
-  const { isEnabled } = await draftMode()
+  let isEnabled = false;
+  
+  // Only check draftMode if not skipped (e.g., during static generation)
+  if (!skipDraftMode) {
+    try {
+      const draft = await draftMode();
+      isEnabled = draft.isEnabled;
+    } catch (error) {
+      // If draftMode fails (e.g., during generateStaticParams), just continue without it
+      isEnabled = false;
+    }
+  }
 
   try {
 

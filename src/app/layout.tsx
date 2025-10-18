@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Preloader from "@/components/ui/preloader";
 import ParticleBackground from "@/components/ui/particle-background";
 import { PortfolioNavbar } from "@/components/ui/portfolio-navbar";
+import ScrollProgressIndicator from "@/components/ui/scroll-indicator";
 import fetchContentType from "@/lib/strapi/fetchContentType";
+import LayoutPreloader from "@/components/ui/layout-preloader";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -48,7 +50,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}
       >
-        <Preloader />
+        <LayoutPreloader />
         <ParticleBackground />
         <PortfolioNavbar logoSrc={logoSrc} logoAlt={logo?.alternativeText || logo?.name || "Logo"} />
         {info?.email && (
@@ -61,6 +63,7 @@ export default async function RootLayout({
           </a>
         )}
         {children}
+        <ScrollProgressIndicator />
       </body>
     </html>
   );
