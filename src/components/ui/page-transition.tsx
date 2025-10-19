@@ -36,6 +36,15 @@ export function usePageTransition(): PageTransitionAPI {
   return ctx;
 }
 
+// Optional accessor: returns null when not inside provider
+export function usePageTransitionOptional(): PageTransitionAPI | null {
+  try {
+    return useContext(PageTransitionContext);
+  } catch {
+    return null;
+  }
+}
+
 // A global page transition overlay that runs on client navigations.
 // Sequence:
 // 1) Grey layer slides up to cover the page
@@ -50,6 +59,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
   const skipNextRef = useRef(false); // Skip effect when we drive transition ourselves
   const animatingRef = useRef(false);
   const contentRef = useRef<HTMLDivElement | null>(null);
+  const popRestoreRef = useRef(false);
 
   const grey = useAnimationControls();
   const grad = useAnimationControls();
@@ -70,9 +80,15 @@ export default function PageTransition({ children }: PageTransitionProps) {
     } catch {}
   }, []);
 
-  // Continuously snapshot scroll position on the homepage so it's always accurate when returning
+  // Detect browser back/forward to restore scroll from storage even without our link flag
   useEffect(() => {
-    if (pathname !== "/") return;
+    const onPop = () => { popRestoreRef.current = true; };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  // Continuously snapshot scroll position for the current route so it's accurate on refresh/return
+  useEffect(() => {
     let raf = 0 as number | any;
     const readScroll = () => {
       try {
@@ -81,7 +97,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
         const y = typeof window.scrollY === 'number'
           ? window.scrollY
           : (document.scrollingElement?.scrollTop || 0);
-        sessionStorage.setItem('scroll:/', String(y));
+        sessionStorage.setItem(`scroll:${pathname}`, String(y));
       } catch {}
     };
     const onScroll = () => {
@@ -95,6 +111,18 @@ export default function PageTransition({ children }: PageTransitionProps) {
       if (raf) cancelAnimationFrame(raf);
     };
   }, [pathname]);
+
+  // On initial mount, restore saved scroll for this route (or hash target) if any
+  useEffect(() => {
+    (async () => {
+      try {
+        const initialHash = typeof window !== 'undefined' ? (window.location.hash || '') : '';
+        const hashTarget = initialHash ? initialHash.replace(/^#/, '') : null;
+        await waitForContentReady({ targetPath: pathname, restoreTargetScroll: !hashTarget, hashTarget });
+      } catch {}
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const refreshScroll = () => {
     try {
@@ -110,7 +138,18 @@ export default function PageTransition({ children }: PageTransitionProps) {
   };
 
   // Wait until the new route's content is painted and key assets are ready
-  const waitForContentReady = useCallback(async (opts?: { targetPath?: string; restoreTargetScroll?: boolean }) => {
+  const waitForContentReady = useCallback(async (opts?: { targetPath?: string; restoreTargetScroll?: boolean; hashTarget?: string | null }) => {
+    // If a targetPath is provided, ensure location changed before proceeding
+    if (opts?.targetPath) {
+      const target = opts.targetPath;
+      const startTs = Date.now();
+      while (Date.now() - startTs < 800) {
+        try {
+          if (window.location && window.location.pathname === target) break;
+        } catch {}
+        await new Promise((r) => setTimeout(r, 16));
+      }
+    }
     const forceScrollTo = async (y: number) => {
       // Try aggressively over a few frames to combat layout shifts or other code
       const apply = (val: number) => {
@@ -163,8 +202,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
     const container = contentRef.current;
     if (!container) return;
 
-    const imgs = Array.from(container.querySelectorAll<HTMLImageElement>("img"))
-      .filter((img) => !img.complete);
+    const imgs = Array.from(container.querySelectorAll<HTMLImageElement>("img")).filter((img) => !img.complete);
 
     if (imgs.length === 0) return;
 
@@ -208,8 +246,53 @@ export default function PageTransition({ children }: PageTransitionProps) {
       });
     });
 
+    // Additionally wait for inline CSS background images (e.g., style.backgroundImage)
+    try {
+      const elementsWithBg = Array.from(container.querySelectorAll<HTMLElement>("*[style*='background-image']"));
+      const bgUrls = new Set<string>();
+      const urlRe = /url\((?:\"|\')?([^\)\"\']+)(?:\"|\')?\)/g;
+      for (const el of elementsWithBg) {
+        const bg = el.style.backgroundImage || "";
+        let m: RegExpExecArray | null;
+        while ((m = urlRe.exec(bg))) {
+          const url = m[1];
+          if (url && !url.startsWith("data:")) bgUrls.add(url);
+        }
+      }
+      if (bgUrls.size > 0) {
+        await new Promise<void>((resolve) => {
+          let remaining = bgUrls.size;
+          let done = false;
+          const finish = () => { if (!done) { done = true; resolve(); } };
+          const timeout = setTimeout(finish, 1000);
+          const onAny = () => { remaining -= 1; if (remaining <= 0) { clearTimeout(timeout); finish(); } };
+          bgUrls.forEach((u) => {
+            try {
+              const im = new Image();
+              im.onload = onAny;
+              im.onerror = onAny;
+              im.src = u;
+            } catch { onAny(); }
+          });
+        });
+      }
+    } catch {}
+
+    // If there's a hash target, prefer scrolling to that anchor rather than restoring last position
+    const hash = (opts?.hashTarget ?? (typeof window !== 'undefined' ? (window.location.hash || '') : '')).replace(/^#/, '');
+    if (hash) {
+      try {
+        const el = document.getElementById(hash) || document.querySelector(`[name="${hash}"]`);
+        if (el) {
+          const rect = (el as HTMLElement).getBoundingClientRect();
+          const y = Math.max(0, (window.scrollY || 0) + rect.top);
+          await forceScrollTo(y);
+        }
+      } catch {}
+    }
+
     // Optionally restore saved scroll again (after images) to account for layout shifts
-    if (opts?.restoreTargetScroll) {
+    if (!hash && opts?.restoreTargetScroll) {
       const path = opts?.targetPath || window.location.pathname;
       try {
         const key = `scroll:${path}`;
@@ -230,7 +313,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
     setIsAnimating(true);
 
     // Parse target path and hash
-    const [rawPath] = href.split("#");
+    const [rawPath, hashPart] = href.split("#");
     const targetPath = rawPath || "/";
 
     // Save the current page scroll position (origin) defensively
@@ -257,7 +340,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
     } catch {}
 
     // Ensure new content is painted and ready before reveal animations
-    await waitForContentReady({ targetPath, restoreTargetScroll: !!(scroll === false && restoreTargetScroll) });
+    await waitForContentReady({ targetPath, restoreTargetScroll: !!(scroll === false && restoreTargetScroll) && !hashPart, hashTarget: hashPart || null });
     try { sessionStorage.removeItem('restore-scroll-target'); } catch {}
 
     // Swap: grey exits, gradient enters
@@ -305,11 +388,21 @@ export default function PageTransition({ children }: PageTransitionProps) {
       // Brief dwell while we sync, then wait until content is really ready
       await new Promise((r) => setTimeout(r, TRANSITION.dwellMs));
 
-      // Only restore scroll if a flag was set by a triggering link
+      // Only restore scroll if a flag was set by a triggering link (and no hash target)
       let shouldRestore = false;
       try { shouldRestore = sessionStorage.getItem('restore-scroll-target') === '1'; } catch {}
-      await waitForContentReady({ restoreTargetScroll: shouldRestore });
+      try {
+        const saved = sessionStorage.getItem(`scroll:${pathname}`);
+        if (saved != null) shouldRestore = true;
+      } catch {}
+      const currentHash = typeof window !== 'undefined' ? (window.location.hash || '') : '';
+      const hashTarget = currentHash ? currentHash.replace(/^#/, '') : null;
+      if (popRestoreRef.current) {
+        shouldRestore = true;
+      }
+      await waitForContentReady({ restoreTargetScroll: shouldRestore && !hashTarget, hashTarget });
       try { sessionStorage.removeItem('restore-scroll-target'); } catch {}
+      popRestoreRef.current = false;
 
       // Swap: grey exits up, gradient enters to cover
       await Promise.all([
@@ -391,3 +484,4 @@ export default function PageTransition({ children }: PageTransitionProps) {
     </PageTransitionContext.Provider>
   );
 }
+

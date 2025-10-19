@@ -5,7 +5,6 @@ import ParticleBackground from "@/components/ui/particle-background";
 import { PortfolioNavbar } from "@/components/ui/portfolio-navbar";
 import ScrollProgressIndicator from "@/components/ui/scroll-indicator";
 import fetchContentType from "@/lib/strapi/fetchContentType";
-import LayoutPreloader from "@/components/ui/layout-preloader";
 import PageTransition from "@/components/ui/page-transition";
 import Footer from "@/components/ui/footer";
 
@@ -52,7 +51,6 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}
       >
-        <LayoutPreloader />
         <ParticleBackground />
         <PortfolioNavbar logoSrc={logoSrc} logoAlt={logo?.alternativeText || logo?.name || "Logo"} />
         {info?.email && (
