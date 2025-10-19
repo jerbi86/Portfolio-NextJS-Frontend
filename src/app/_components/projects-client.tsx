@@ -246,6 +246,26 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
     { scope: containerRef }
   );
 
+  // Unreveal entire projects section together near the end
+  useGSAP(
+    () => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "bottom 50%",
+          end: "bottom 20%",
+          scrub: 1,
+        },
+      });
+
+      tl.to(containerRef.current, {
+        y: -150,
+        autoAlpha: 0,
+      });
+    },
+    { scope: containerRef }
+  );
+
   const handleMouseEnter = (id: string) => {
     if (typeof window !== "undefined" && window.innerWidth < 768) {
       setSelectedProject(null);
