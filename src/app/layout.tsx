@@ -7,6 +7,7 @@ import ScrollProgressIndicator from "@/components/ui/scroll-indicator";
 import fetchContentType from "@/lib/strapi/fetchContentType";
 import LayoutPreloader from "@/components/ui/layout-preloader";
 import PageTransition from "@/components/ui/page-transition";
+import Footer from "@/components/ui/footer";
 
 
 const geistSans = Geist({
@@ -66,6 +67,11 @@ export default async function RootLayout({
         <PageTransition>
           {children}
         </PageTransition>
+        <Footer
+          name={[info?.firstName, info?.lastName].filter(Boolean).join(" ") || undefined}
+          email={info?.email || undefined}
+          github={info?.github || undefined}
+        />
         <ScrollProgressIndicator />
       </body>
     </html>

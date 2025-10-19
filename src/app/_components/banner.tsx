@@ -31,7 +31,7 @@ export default async function Banner() {
   const height = best?.height ?? image?.height ?? 500;
 
   return (
-    <section className="relative w-full flex items-center justify-center">
+    <section className="relative w-full flex items-center justify-center mt-16 sm:mt-20 md:mt-28">
   <SectionReveal className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
         <div className="relative md:min-h-[65vh]">
           <div className="mx-auto md:mx-0 max-w-2xl md:absolute md:left-0 md:top-1/2 md:-translate-y-1/2">
