@@ -27,7 +27,6 @@ type PageTransitionAPI = {
 };
 
 const PageTransitionContext = createContext<PageTransitionAPI | null>(null);
-
 export function usePageTransition(): PageTransitionAPI {
   const ctx = useContext(PageTransitionContext);
   if (!ctx) {
@@ -36,7 +35,7 @@ export function usePageTransition(): PageTransitionAPI {
   return ctx;
 }
 
-// Optional accessor: returns null when not inside provider
+// Optional accessor: returns null when provider is not present
 export function usePageTransitionOptional(): PageTransitionAPI | null {
   try {
     return useContext(PageTransitionContext);
@@ -195,56 +194,83 @@ export default function PageTransition({ children }: PageTransitionProps) {
     try {
       if (document.fonts && document.fonts.ready) {
         await document.fonts.ready;
+  
+    // If there's a hash target, wait until that anchor exists in the DOM
+    let anchorEl: HTMLElement | null = null;
+    const hashRaw = opts?.hashTarget ?? (typeof window !== 'undefined' ? (window.location.hash || '') : '');
+    const hash = (hashRaw || '').replace(/^#/, '');
+    if (hash) {
+      for (let i = 0; i < 90; i++) { // ~1.5s @ 60fps
+        try {
+          anchorEl = (document.getElementById(hash) as HTMLElement) || (document.querySelector(`[name="${hash}"]`) as HTMLElement);
+          if (anchorEl) break;
+        } catch {}
+        await new Promise<void>((r) => requestAnimationFrame(() => r()));
       }
+    }    }
     } catch {}
+
+    // If there's a hash target, wait until that anchor exists in the DOM
+    let anchorEl: HTMLElement | null = null;
+    const hashRaw = opts?.hashTarget ?? (typeof window !== 'undefined' ? (window.location.hash || '') : '');
+    const hash = (hashRaw || '').replace(/^#/, '');
+    if (hash) {
+      for (let i = 0; i < 90; i++) { // ~1.5s @ 60fps
+        try {
+          anchorEl = (document.getElementById(hash) as HTMLElement) || (document.querySelector(`[name="${hash}"]`) as HTMLElement);
+          if (anchorEl) break;
+        } catch {}
+        await new Promise<void>((r) => requestAnimationFrame(() => r()));
+      }
+    }
 
     // Wait for above-the-fold images within the new content, with timeout safety
     const container = contentRef.current;
-    if (!container) return;
+    if (container) {
+      const imgs = Array.from(container.querySelectorAll<HTMLImageElement>("img")).filter((img) => !img.complete);
 
-    const imgs = Array.from(container.querySelectorAll<HTMLImageElement>("img")).filter((img) => !img.complete);
+      if (imgs.length > 0) {
+        await new Promise<void>((resolve) => {
+          let resolved = false;
+          const done = () => {
+            if (!resolved) {
+              resolved = true;
+              resolve();
+            }
+          };
 
-    if (imgs.length === 0) return;
+          const timeout = setTimeout(done, 900); // cap wait to avoid laggy feel
 
-    await new Promise<void>((resolve) => {
-      let resolved = false;
-      const done = () => {
-        if (!resolved) {
-          resolved = true;
-          resolve();
-        }
-      };
+          let remaining = imgs.length;
+          const onLoad = () => {
+            remaining -= 1;
+            if (remaining <= 0) {
+              clearTimeout(timeout);
+              done();
+            }
+          };
 
-      const timeout = setTimeout(done, 900); // cap wait to avoid laggy feel
-
-      let remaining = imgs.length;
-      const onLoad = () => {
-        remaining -= 1;
-        if (remaining <= 0) {
-          clearTimeout(timeout);
-          done();
-        }
-      };
-
-      imgs.forEach((img) => {
-        if (img.complete) {
-          onLoad();
-          return;
-        }
-        const off = () => {
-          img.removeEventListener("load", onLoad);
-          img.removeEventListener("error", onLoad);
-        };
-        img.addEventListener("load", () => {
-          off();
-          onLoad();
+          imgs.forEach((img) => {
+            if (img.complete) {
+              onLoad();
+              return;
+            }
+            const off = () => {
+              img.removeEventListener("load", onLoad);
+              img.removeEventListener("error", onLoad);
+            };
+            img.addEventListener("load", () => {
+              off();
+              onLoad();
+            });
+            img.addEventListener("error", () => {
+              off();
+              onLoad();
+            });
+          });
         });
-        img.addEventListener("error", () => {
-          off();
-          onLoad();
-        });
-      });
-    });
+      }
+    }
 
     // Additionally wait for inline CSS background images (e.g., style.backgroundImage)
     try {
@@ -279,13 +305,30 @@ export default function PageTransition({ children }: PageTransitionProps) {
     } catch {}
 
     // If there's a hash target, prefer scrolling to that anchor rather than restoring last position
-    const hash = (opts?.hashTarget ?? (typeof window !== 'undefined' ? (window.location.hash || '') : '')).replace(/^#/, '');
-    if (hash) {
+    const hash2 = (opts?.hashTarget ?? (typeof window !== 'undefined' ? (window.location.hash || '') : '')).replace(/^#/, '');
+    if (hash2) {
       try {
-        const el = document.getElementById(hash) || document.querySelector(`[name="${hash}"]`);
+      } catch {}
+    }
+    if (hash2) {
+      try {
+        const el = anchorEl || document.getElementById(hash2) || document.querySelector(`[name="${hash2}"]`);
         if (el) {
           const rect = (el as HTMLElement).getBoundingClientRect();
-          const y = Math.max(0, (window.scrollY || 0) + rect.top);
+          let offset = 0;
+          try {
+            const cssVar = getComputedStyle(document.documentElement).getPropertyValue('--anchor-offset');
+            const parsed = parseInt(cssVar, 10);
+            if (!Number.isNaN(parsed)) offset = parsed;
+          } catch {}
+          try {
+            if (offset === 0) {
+              const nav = document.querySelector('div.fixed.top-0') as HTMLElement | null;
+              if (nav) offset = Math.max(offset, nav.getBoundingClientRect().height || 0);
+            }
+          } catch {}
+          if (offset === 0) offset = 96;
+          const y = Math.max(0, (window.scrollY || 0) + rect.top - offset);
           await forceScrollTo(y);
         }
       } catch {}
@@ -484,4 +527,5 @@ export default function PageTransition({ children }: PageTransitionProps) {
     </PageTransitionContext.Provider>
   );
 }
+
 

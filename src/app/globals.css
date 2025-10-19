@@ -86,6 +86,8 @@
   --gradient-secondary: #00ccb1;
   --gradient-tertiary: #7b61ff;
   --gradient-quaternary: #ffc414;
+  /* Anchor offset used by native in-page navigation and page-transition */
+  --anchor-offset: 96px;
 }
 
 .dark {
@@ -129,6 +131,11 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  
+  /* Ensure in-page anchors are not hidden behind the fixed navbar */
+  section[id] {
+    scroll-margin-top: var(--anchor-offset);
   }
   
   /* Hide scrollbar for Chrome, Safari and Opera */

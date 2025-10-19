@@ -12,9 +12,8 @@ export default function NotFound() {
           The project you're looking for doesn't exist or has been removed.
         </p>
         <TransitionLink
-          href="/"
-          scroll={false}
-          restoreTargetScroll
+          href="/#projects"
+          variant="project"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-gradient-primary to-gradient-secondary text-white font-bold hover:shadow-lg hover:shadow-gradient-primary/50 transition-all"
         >
           Back to Projects

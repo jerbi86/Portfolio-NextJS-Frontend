@@ -22,8 +22,8 @@ export default function AboutMeClient({ firstName, quote, longDescription }: Pro
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
-          start: 'top 60%',
-          end: 'bottom 50%',
+          start: 'top 75%',
+          end: 'bottom 60%',
           toggleActions: 'restart none none reverse',
           scrub: 1,
         },

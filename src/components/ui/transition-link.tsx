@@ -29,19 +29,8 @@ export default function TransitionLink({ href, replace, scroll, restoreTargetScr
     ) {
       return;
     }
-    // Only apply project variant transition when currently on a project slug page and when provider is available
-    if (variant === "project") {
-      try {
-        const curr = window.location.pathname || "";
-        if (!curr.startsWith("/projects/") || !start) {
-          return; // fall back to default navigation
-        }
-      } catch {
-        return;
-      }
-    } else if (!start) {
-      return; // no provider, allow default
-    }
+    // Only apply transition when provider is available (inside PageTransition)
+    if (!start) return;
     e.preventDefault();
     try {
       // Save current page scroll before leaving so it can be restored later

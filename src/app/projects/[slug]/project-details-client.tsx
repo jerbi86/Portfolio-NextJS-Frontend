@@ -132,9 +132,8 @@ export default function ProjectDetailsClient({ project }: ProjectDetailsClientPr
     <section className="pt-32 pb-14">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-8" ref={containerRef}>
         <TransitionLink
-          href="/"
-          scroll={false}
-          restoreTargetScroll
+          href="/#projects"
+          variant="project"
           className="mb-16 inline-flex gap-2 items-center group h-12 text-white/70 hover:text-white transition-colors"
         >
           <ArrowLeft className="group-hover:-translate-x-1 group-hover:text-gradient-primary transition-all duration-300" />

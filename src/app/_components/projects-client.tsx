@@ -116,6 +116,7 @@ const ProjectItem = ({ index, project, selectedProject, onMouseEnter, onMouseLea
   return (
     <TransitionLink
       href={`/projects/${project.slug}`}
+      variant="project"
       className="project-item group leading-none py-5 md:border-b border-white/10 first:!pt-0 last:pb-0 last:border-none md:group-hover/projects:opacity-30 md:hover:!opacity-100 transition-all cursor-pointer block"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeaveLocal}

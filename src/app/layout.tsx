@@ -7,6 +7,8 @@ import ScrollProgressIndicator from "@/components/ui/scroll-indicator";
 import fetchContentType from "@/lib/strapi/fetchContentType";
 import PageTransition from "@/components/ui/page-transition";
 import Footer from "@/components/ui/footer";
+import LayoutPreloader from "@/components/ui/layout-preloader";
+import Preloader from "@/components/ui/preloader";
 
 
 const geistSans = Geist({
@@ -51,18 +53,19 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}
       >
+        <LayoutPreloader />
         <ParticleBackground />
-        <PortfolioNavbar logoSrc={logoSrc} logoAlt={logo?.alternativeText || logo?.name || "Logo"} />
-        {info?.email && (
-          <a
-            href={`mailto:${info.email}`}
-            className="hidden md:flex fixed left-4 top-[85%] -translate-y-1/2 -rotate-90 origin-left text-white/70 hover:text-white transition-colors z-20 tracking-widest uppercase text-xs"
-            aria-label={`Email ${info.firstName} ${info.lastName}`}
-          >
-            {info.email}
-          </a>
-        )}
         <PageTransition>
+          <PortfolioNavbar logoSrc={logoSrc} logoAlt={logo?.alternativeText || logo?.name || "Logo"} />
+          {info?.email && (
+            <a
+              href={`mailto:${info.email}`}
+              className="hidden md:flex fixed left-4 top-[85%] -translate-y-1/2 -rotate-90 origin-left text-white/70 hover:text-white transition-colors z-20 tracking-widest uppercase text-xs"
+              aria-label={`Email ${info.firstName} ${info.lastName}`}
+            >
+              {info.email}
+            </a>
+          )}
           {children}
         </PageTransition>
         <Footer
@@ -71,6 +74,7 @@ export default async function RootLayout({
           github={info?.github || undefined}
         />
         <ScrollProgressIndicator />
+        <Preloader />
       </body>
     </html>
   );
