@@ -58,11 +58,19 @@ export default function ExperienceClient({ items }: ExperienceClientProps) {
         },
       });
 
+      // Reveal the vertical timeline line together with the first item
+      tl.from('.timeline-line', {
+        y: 50,
+        opacity: 0,
+        stagger: 0.15,
+        autoAlpha: 0,
+      }, 0);
+
       tl.from('.experience-item', {
         y: 50,
         opacity: 0,
         stagger: 0.15,
-      });
+      }, 0);
     },
     { scope: containerRef },
   );
@@ -90,7 +98,7 @@ export default function ExperienceClient({ items }: ExperienceClientProps) {
   return (
     <div className="relative mt-10" ref={containerRef}>
       {/* Timeline line */}
-      <div className="hidden md:block absolute left-[162px] top-8 bottom-8 w-0.5 bg-gradient-to-b from-gradient-primary via-gradient-secondary to-gradient-tertiary" />
+      <div className="timeline-line hidden md:block absolute left-[162px] top-8 bottom-8 w-0.5 bg-gradient-to-b from-gradient-primary via-gradient-secondary to-gradient-tertiary" />
 
       <div className="space-y-8">
         {items.map((exp) => (
@@ -170,4 +178,3 @@ export default function ExperienceClient({ items }: ExperienceClientProps) {
     </div>
   );
 }
-
