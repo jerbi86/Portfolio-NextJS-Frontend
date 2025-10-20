@@ -57,7 +57,6 @@ interface ProjectDetailsClientProps {
 
 export default function ProjectDetailsClient({ project }: ProjectDetailsClientProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const base = process.env.NEXT_PUBLIC_API_URL || "";
 
   useGSAP(
     () => {
@@ -231,7 +230,8 @@ export default function ProjectDetailsClient({ project }: ProjectDetailsClientPr
         >
           {project.image.map((img) => {
             const imageUrl = img.formats?.large?.url || img.formats?.medium?.url || img.url;
-            const fullImageUrl = imageUrl.startsWith("http") ? imageUrl : `${base}${imageUrl}`;
+            // Keep relative path so it is proxied by Next.js rewrites
+            const fullImageUrl = imageUrl;
 
             return (
               <div

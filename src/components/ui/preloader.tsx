@@ -20,7 +20,7 @@ const Preloader = ({ active = true, onDone }: PreloaderProps) => {
         },
       });
 
-      tl.to('.name-text span', {
+      tl.to('.name-text .letter', {
         y: 0,
         stagger: 0.05,
         duration: 0.2,
@@ -58,21 +58,28 @@ const Preloader = ({ active = true, onDone }: PreloaderProps) => {
             <div className="preloader-item h-full w-[10%] bg-black"></div>
             <div className="preloader-item h-full w-[10%] bg-black"></div>
 
-            <p className="name-text flex text-[16vw] sm:text-[14vw] lg:text-[200px] font-anton text-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 leading-none overflow-hidden text-white">
-                <span className="inline-block translate-y-full">A</span>
-                <span className="inline-block translate-y-full">H</span>
-                <span className="inline-block translate-y-full">M</span>
-                <span className="inline-block translate-y-full">E</span>
-                <span className="inline-block translate-y-full">D</span>
-                <span className="inline-block translate-y-full">&nbsp;</span>
-                <span className="inline-block translate-y-full">J</span>
-                <span className="inline-block translate-y-full">E</span>
-                <span className="inline-block translate-y-full">R</span>
-                <span className="inline-block translate-y-full">B</span>
-                <span className="inline-block translate-y-full">I</span>
-            </p>
+            <p className="name-text flex flex-col sm:flex-row items-center justify-center text-[16vw] sm:text-[14vw] lg:text-[200px] font-anton font-black text-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 leading-none overflow-hidden text-white">
+            {/* first name: block on mobile, inline on sm+ */}
+              <span className="first-name block sm:inline-flex items-center justify-center whitespace-nowrap mb-0 sm:mr-4">
+                <span className="inline-block letter translate-y-full">A</span>
+                <span className="inline-block letter translate-y-full">H</span>
+                <span className="inline-block letter translate-y-full">M</span>
+                <span className="inline-block letter translate-y-full">E</span>
+                <span className="inline-block letter translate-y-full">D</span>
+              </span>
+
+              {/* last name: block on mobile, inline on sm+; stays no-wrap */}
+              <span className="last-name block sm:inline-flex items-center justify-center whitespace-nowrap">
+                <span className="inline-block letter translate-y-full">J</span>
+                <span className="inline-block letter translate-y-full">E</span>
+                <span className="inline-block letter translate-y-full">R</span>
+                <span className="inline-block letter translate-y-full">B</span>
+                <span className="inline-block letter translate-y-full">I</span>
+              </span>
+          </p>
         </div>
   );
 };
 
 export default Preloader;
+

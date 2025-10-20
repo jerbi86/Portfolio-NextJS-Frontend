@@ -75,7 +75,6 @@ interface ProjectItemProps {
 
 const ProjectItem = ({ index, project, selectedProject, onMouseEnter, onMouseLeave }: ProjectItemProps) => {
   const externalLinkSVGRef = useRef<SVGSVGElement>(null);
-  const base = process.env.NEXT_PUBLIC_API_URL || "";
 
   const { context, contextSafe } = useGSAP(() => {}, {
     scope: externalLinkSVGRef,
@@ -111,7 +110,7 @@ const ProjectItem = ({ index, project, selectedProject, onMouseEnter, onMouseLea
   });
 
   const imageUrl = project.image[0]?.formats?.medium?.url || project.image[0]?.formats?.small?.url || project.image[0]?.url;
-  const fullImageUrl = imageUrl ? (imageUrl.startsWith("http") ? imageUrl : `${base}${imageUrl}`) : "";
+  const fullImageUrl = imageUrl || ""; // Use relative or absolute as provided
 
   return (
     <TransitionLink
@@ -183,7 +182,6 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const [selectedProject, setSelectedProject] = useState<string | null>(projects[0]?.documentId || null);
-  const base = process.env.NEXT_PUBLIC_API_URL || "";
 
   useGSAP(
     (context, contextSafe) => {
@@ -288,7 +286,7 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
         >
           {projects.map((project) => {
             const imageUrl = project.image[0]?.formats?.large?.url || project.image[0]?.formats?.medium?.url || project.image[0]?.url;
-            const fullImageUrl = imageUrl ? (imageUrl.startsWith("http") ? imageUrl : `${base}${imageUrl}`) : "";
+            const fullImageUrl = imageUrl || "";
             
             if (!fullImageUrl) return null;
             

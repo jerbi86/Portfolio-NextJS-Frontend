@@ -40,14 +40,9 @@ export default async function RootLayout({
   const info = data?.personnelInformations;
   const logo = info?.logo;
   const logoUrl = logo?.url;
-  const base = process.env.NEXT_PUBLIC_API_URL;
-  let logoSrc = "";
-  try {
-    if (logoUrl && base) logoSrc = new URL(logoUrl, base).href;
-    else if (typeof logoUrl === "string") logoSrc = logoUrl;
-  } catch {
-    // ignore
-  }
+  // Keep logo URL relative (e.g., /uploads/logo.svg) so it is served
+  // by this Next app and proxied to Strapi via rewrites.
+  const logoSrc = typeof logoUrl === "string" ? logoUrl : "";
   return (
     <html lang="en" className="dark overflow-x-hidden">
       <body

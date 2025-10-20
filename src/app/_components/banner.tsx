@@ -14,13 +14,8 @@ export default async function Banner() {
   const formats = image?.formats;
   const best = formats?.medium ?? formats?.small ?? formats?.thumbnail ?? image;
   const relUrl: string | undefined = best?.url;
-  const base = process.env.NEXT_PUBLIC_API_URL;
-
-  let src = "";
-  try {
-    if (relUrl && base) src = new URL(relUrl, base).href;
-    else if (typeof relUrl === "string") src = relUrl;
-  } catch {}
+  // Keep relative so it is proxied by Next.js rewrites
+  const src = relUrl || "";
 
   const width = best?.width ?? image?.width ?? 400;
   const height = best?.height ?? image?.height ?? 500;
@@ -34,7 +29,7 @@ export default async function Banner() {
         email={info?.email}
         github={info?.github}
         linkedin={info?.linkedin}
-        resumeUrl={info?.resume?.url ? (base ? new URL(info.resume.url, base).href : info.resume.url) : null}
+        resumeUrl={info?.resume?.url ? info.resume.url : null}
         imageSrc={src}
         imageWidth={width}
         imageHeight={height}

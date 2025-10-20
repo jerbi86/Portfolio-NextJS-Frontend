@@ -37,7 +37,7 @@ export const PortfolioNavbar = ({ logoSrc, logoAlt = "Logo" }: PortfolioNavbarPr
     const inner = (
       <>
         {logoSrc ? (
-          <div className="relative w-16 h-16 [&_svg]:fill-[url(#logo-gradient)] [&_path]:fill-[url(#logo-gradient)]">
+          <div className="relative w-16 h-16 mx-auto grid place-items-center [&_svg]:fill-[url(#logo-gradient)] [&_path]:fill-[url(#logo-gradient)]">
             <Image
               src={logoSrc}
               alt={logoAlt}
@@ -47,6 +47,7 @@ export const PortfolioNavbar = ({ logoSrc, logoAlt = "Logo" }: PortfolioNavbarPr
               style={{
                 filter: 'brightness(0) saturate(100%) invert(48%) sepia(93%) saturate(2476%) hue-rotate(180deg) brightness(102%) contrast(101%)'
               }}
+              unoptimized
             />
             <svg width="0" height="0" className="absolute">
               <defs>
@@ -67,13 +68,13 @@ export const PortfolioNavbar = ({ logoSrc, logoAlt = "Logo" }: PortfolioNavbarPr
 
     if (useTransition) {
       return (
-        <TransitionLink href="/#" variant="project" className="relative z-20 flex items-center space-x-2 px-2 py-1">
+        <TransitionLink href="/#" variant="project" className="relative z-20 flex items-center justify-center space-x-2 px-2 py-1">
           {inner}
         </TransitionLink>
       );
     }
     return (
-      <a href="/#" className="relative z-20 flex items-center space-x-2 px-2 py-1">
+      <a href="/#" className="relative z-20 flex items-center justify-center space-x-2 px-2 py-1">
         {inner}
       </a>
     );
