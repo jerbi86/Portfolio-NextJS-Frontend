@@ -8,7 +8,6 @@ import fetchContentType from "@/lib/strapi/fetchContentType";
 import PageTransition from "@/components/ui/page-transition";
 import Footer from "@/components/ui/footer";
 import LayoutPreloader from "@/components/ui/layout-preloader";
-import Preloader from "@/components/ui/preloader";
 
 
 const geistSans = Geist({
@@ -69,7 +68,6 @@ export default async function RootLayout({
           github={info?.github || undefined}
         />
         <ScrollProgressIndicator />
-        <Preloader />
       </body>
     </html>
   );
