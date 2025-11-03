@@ -1,5 +1,11 @@
 import type { NextRequest } from "next/server";
 
+// Ensure this route runs in the Node.js runtime so HTTP (non-HTTPS) Strapi endpoints are allowed
+// and to avoid Edge runtime restrictions when proxying images.
+export const runtime = 'nodejs';
+// Always treat as dynamic to avoid unexpected caching issues for images.
+export const dynamic = 'force-dynamic';
+
 // Proxy /uploads/* to the Strapi API host so that:
 // - Client-side CSS background images using relative URLs work in production
 // - next/image optimizer can fetch relative /uploads/* from the same origin
