@@ -20,6 +20,7 @@ export default async function Banner() {
 
   const width = best?.width ?? image?.width ?? 400;
   const height = best?.height ?? image?.height ?? 500;
+  const resumeHref = info?.resume?.url ? toAbsoluteMediaUrl(info.resume.url) : null;
 
   return (
     <section className="relative w-full flex items-center justify-center mt-16 sm:mt-20 md:mt-28">
@@ -30,7 +31,7 @@ export default async function Banner() {
         email={info?.email}
         github={info?.github}
         linkedin={info?.linkedin}
-        resumeUrl={info?.resume?.url ? info.resume.url : null}
+        resumeUrl={resumeHref}
         imageSrc={src}
         imageWidth={width}
         imageHeight={height}

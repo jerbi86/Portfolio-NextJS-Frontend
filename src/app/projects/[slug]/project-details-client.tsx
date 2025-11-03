@@ -6,7 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import Image from "next/image";
 import TransitionLink from "@/components/ui/transition-link";
-import { toMediaPath, normalizeRichTextMedia } from "@/lib/media";
+import { toMediaPath, normalizeRichTextMedia, toAbsoluteMediaUrl } from "@/lib/media";
 import { useRef } from "react";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -231,8 +231,8 @@ export default function ProjectDetailsClient({ project }: ProjectDetailsClientPr
         >
           {project.image.map((img) => {
             const imageUrl = img.formats?.large?.url || img.formats?.medium?.url || img.url;
-            // Normalize to relative path when the image belongs to the API host
-            const fullImageUrl = toMediaPath(imageUrl);
+            // Use absolute API URL explicitly for backgrounds and links
+            const fullImageUrl = toAbsoluteMediaUrl(imageUrl);
 
             return (
               <div
