@@ -36,6 +36,8 @@ const nextConfig: NextConfig = {
   images: {
     // Allow common remote patterns if absolute URLs are ever used
     remotePatterns: baseRemotePatterns,
+    // Temporary bypass to verify production image pipeline; set to false later when stable
+    unoptimized: true,
   },
   async rewrites() {
     // Proxy Strapi uploads through Next.js so clients (e.g., phones)

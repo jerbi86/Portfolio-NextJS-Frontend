@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useRef, useState, MouseEvent } from "react";
 import { cn } from "@/lib/utils";
 import TransitionLink from "@/components/ui/transition-link";
+import { toMediaPath } from "@/lib/media";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -110,7 +111,7 @@ const ProjectItem = ({ index, project, selectedProject, onMouseEnter, onMouseLea
   });
 
   const imageUrl = project.image[0]?.formats?.medium?.url || project.image[0]?.formats?.small?.url || project.image[0]?.url;
-  const fullImageUrl = imageUrl || ""; // Use relative or absolute as provided
+  const fullImageUrl = toMediaPath(imageUrl || "");
 
   return (
     <TransitionLink
@@ -286,7 +287,7 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
         >
           {projects.map((project) => {
             const imageUrl = project.image[0]?.formats?.large?.url || project.image[0]?.formats?.medium?.url || project.image[0]?.url;
-            const fullImageUrl = imageUrl || "";
+            const fullImageUrl = toMediaPath(imageUrl || "");
             
             if (!fullImageUrl) return null;
             
