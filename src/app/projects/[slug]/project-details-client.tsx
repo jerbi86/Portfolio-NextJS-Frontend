@@ -6,7 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import Image from "next/image";
 import TransitionLink from "@/components/ui/transition-link";
-import { toMediaPath } from "@/lib/media";
+import { toMediaPath, normalizeRichTextMedia } from "@/lib/media";
 import { useRef } from "react";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -189,7 +189,7 @@ export default function ProjectDetailsClient({ project }: ProjectDetailsClientPr
                 </p>
                 <div
                   className="text-lg text-white/70 prose prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: project.description }}
+                  dangerouslySetInnerHTML={{ __html: normalizeRichTextMedia(project.description) }}
                 />
               </div>
 

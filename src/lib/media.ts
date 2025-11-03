@@ -29,3 +29,26 @@ export function toAbsoluteMediaUrl(url?: string | null): string {
     return url;
   }
 }
+
+// Rewrite src/href attributes in rich text HTML to absolute URLs against NEXT_PUBLIC_API_URL
+export function normalizeRichTextMedia(html?: string | null): string {
+  if (!html) return '';
+  const api = process.env.NEXT_PUBLIC_API_URL;
+  if (!api) return html;
+  try {
+    // Replace src/href attributes pointing to relative /uploads/* or to the API host with absolute URLs
+    return html.replace(/\b(src|href)=("|')([^"']+)(\2)/gi, (_m, attr: string, quote: string, val: string) => {
+      try {
+        // Only rewrite if it's relative or same-host as API
+        const u = new URL(val, api);
+        // Always force absolute to API
+        const abs = u.href;
+        return `${attr}=${quote}${abs}${quote}`;
+      } catch {
+        return `${attr}=${quote}${val}${quote}`;
+      }
+    });
+  } catch {
+    return html;
+  }
+}

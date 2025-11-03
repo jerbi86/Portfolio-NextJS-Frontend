@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef } from 'react';
+import { normalizeRichTextMedia } from '@/lib/media';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -92,7 +93,7 @@ export default function EducationClient({ items }: EducationClientProps) {
             </div>
           </div>
           {ed.description && (
-            <div className="prose prose-invert max-w-none text-white/80 mt-4" dangerouslySetInnerHTML={{ __html: ed.description }} />
+            <div className="prose prose-invert max-w-none text-white/80 mt-4" dangerouslySetInnerHTML={{ __html: normalizeRichTextMedia(ed.description) }} />
           )}
           <div className="mt-6 h-px w-full bg-white/10" />
         </article>

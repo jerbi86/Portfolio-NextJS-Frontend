@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef } from 'react';
+import { normalizeRichTextMedia } from '@/lib/media';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -166,7 +167,7 @@ export default function ExperienceClient({ items }: ExperienceClientProps) {
                   {exp.description && (
                     <div
                       className="prose prose-invert max-w-none text-white/70 prose-ul:space-y-2 prose-li:text-white/70 prose-strong:text-white prose-strong:font-bold"
-                      dangerouslySetInnerHTML={{ __html: exp.description }}
+                      dangerouslySetInnerHTML={{ __html: normalizeRichTextMedia(exp.description) }}
                     />
                   )}
                 </div>
