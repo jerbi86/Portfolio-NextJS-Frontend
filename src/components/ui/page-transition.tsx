@@ -274,33 +274,36 @@ export default function PageTransition({ children }: PageTransitionProps) {
 
     // Additionally wait for inline CSS background images (e.g., style.backgroundImage)
     try {
-      const elementsWithBg = Array.from(container.querySelectorAll<HTMLElement>("*[style*='background-image']"));
-      const bgUrls = new Set<string>();
-      const urlRe = /url\((?:\"|\')?([^\)\"\']+)(?:\"|\')?\)/g;
-      for (const el of elementsWithBg) {
-        const bg = el.style.backgroundImage || "";
-        let m: RegExpExecArray | null;
-        while ((m = urlRe.exec(bg))) {
-          const url = m[1];
-          if (url && !url.startsWith("data:")) bgUrls.add(url);
+      const containerEl = contentRef.current;
+      if (containerEl) {
+        const elementsWithBg = Array.from(containerEl.querySelectorAll<HTMLElement>("*[style*='background-image']"));
+        const bgUrls = new Set<string>();
+        const urlRe = /url\((?:\"|\')?([^\)\"\']+)(?:\"|\')?\)/g;
+        for (const el of elementsWithBg) {
+          const bg = el.style.backgroundImage || "";
+          let m: RegExpExecArray | null;
+          while ((m = urlRe.exec(bg))) {
+            const url = m[1];
+            if (url && !url.startsWith("data:")) bgUrls.add(url);
+          }
         }
-      }
-      if (bgUrls.size > 0) {
-        await new Promise<void>((resolve) => {
-          let remaining = bgUrls.size;
-          let done = false;
-          const finish = () => { if (!done) { done = true; resolve(); } };
-          const timeout = setTimeout(finish, 1000);
-          const onAny = () => { remaining -= 1; if (remaining <= 0) { clearTimeout(timeout); finish(); } };
-          bgUrls.forEach((u) => {
-            try {
-              const im = new Image();
-              im.onload = onAny;
-              im.onerror = onAny;
-              im.src = u;
-            } catch { onAny(); }
+        if (bgUrls.size > 0) {
+          await new Promise<void>((resolve) => {
+            let remaining = bgUrls.size;
+            let done = false;
+            const finish = () => { if (!done) { done = true; resolve(); } };
+            const timeout = setTimeout(finish, 1000);
+            const onAny = () => { remaining -= 1; if (remaining <= 0) { clearTimeout(timeout); finish(); } };
+            bgUrls.forEach((u) => {
+              try {
+                const im = new Image();
+                im.onload = onAny;
+                im.onerror = onAny;
+                im.src = u;
+              } catch { onAny(); }
+            });
           });
-        });
+        }
       }
     } catch {}
 
