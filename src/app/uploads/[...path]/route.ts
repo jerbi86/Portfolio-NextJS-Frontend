@@ -4,13 +4,17 @@ import type { NextRequest } from "next/server";
 // - Client-side CSS background images using relative URLs work in production
 // - next/image optimizer can fetch relative /uploads/* from the same origin
 // This complements next.config.ts rewrites and is more reliable for server-side fetches.
-export async function GET(req: NextRequest, context: { params: { path: string[] } }) {
+// In Next.js 15+, context.params may be a Promise; accept that shape and await it.
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<{ path: string[] }> }
+) {
   const api = process.env.NEXT_PUBLIC_API_URL;
   if (!api) {
     return new Response("Missing NEXT_PUBLIC_API_URL", { status: 500 });
   }
 
-  const pathSegs = context.params?.path || [];
+  const { path: pathSegs = [] } = await context.params;
   const target = `${api.replace(/\/$/, "")}/uploads/${pathSegs.map(encodeURIComponent).join("/")}`;
 
   // Forward a minimal set of headers that matter for images (Range for partial content, etc.)
