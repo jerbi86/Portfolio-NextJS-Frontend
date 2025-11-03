@@ -8,6 +8,7 @@ import fetchContentType from "@/lib/strapi/fetchContentType";
 import PageTransition from "@/components/ui/page-transition";
 import Footer from "@/components/ui/footer";
 import LayoutPreloader from "@/components/ui/layout-preloader";
+import { toAbsoluteMediaUrl } from "@/lib/media";
 
 
 const geistSans = Geist({
@@ -39,9 +40,8 @@ export default async function RootLayout({
   const info = data?.personnelInformations;
   const logo = info?.logo;
   const logoUrl = logo?.url;
-  // Keep logo URL relative (e.g., /uploads/logo.svg) so it is served
-  // by this Next app and proxied to Strapi via rewrites.
-  const logoSrc = typeof logoUrl === "string" ? logoUrl : "";
+  // Make logo absolute against the API so it is always fetched from NEXT_PUBLIC_API_URL
+  const logoSrc = typeof logoUrl === "string" ? toAbsoluteMediaUrl(logoUrl) : "";
   return (
     <html lang="en" className="dark overflow-x-hidden">
       <body
