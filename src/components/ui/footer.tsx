@@ -35,7 +35,7 @@ export default function Footer({ name, email, github }: FooterProps) {
             </a>
           ) : (
             displayName
-          )}, inspired by {" "}
+          )}, inspired from {" "}
           <a
             href="https://github.com/Tajmirul"
             target="_blank"
