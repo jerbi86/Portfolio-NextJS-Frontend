@@ -120,6 +120,7 @@ export default function BannerClient({ fullName, role, shortDescription, email, 
               alt={"Profile image"}
               className="w-full h-auto object-contain"
               priority
+              unoptimized
             />
           </BackgroundGradient>
         ) : (

@@ -1,6 +1,7 @@
 import ArrowAnimation from "@/components/ui/arrow-animation";
 import fetchContentType from "@/lib/strapi/fetchContentType";
 import BannerClient from "./banner-client";
+import { toAbsoluteMediaUrl } from "@/lib/media";
 
 export default async function Banner() {
   const data = await fetchContentType(
@@ -14,8 +15,8 @@ export default async function Banner() {
   const formats = image?.formats;
   const best = formats?.medium ?? formats?.small ?? formats?.thumbnail ?? image;
   const relUrl: string | undefined = best?.url;
-  // Keep relative so it is proxied by Next.js rewrites
-  const src = relUrl || "";
+  // Build absolute URL against API to avoid optimizer relative fetches in production
+  const src = toAbsoluteMediaUrl(relUrl || "");
 
   const width = best?.width ?? image?.width ?? 400;
   const height = best?.height ?? image?.height ?? 500;
