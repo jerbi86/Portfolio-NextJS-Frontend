@@ -7,7 +7,7 @@ import Image from "next/image";
 import { useRef, useState, MouseEvent } from "react";
 import { cn } from "@/lib/utils";
 import TransitionLink from "@/components/ui/transition-link";
-import { toMediaPath } from "@/lib/media";
+import { toAbsoluteMediaUrl, toMediaPath } from "@/lib/media";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -111,7 +111,8 @@ const ProjectItem = ({ index, project, selectedProject, onMouseEnter, onMouseLea
   });
 
   const imageUrl = project.image[0]?.formats?.medium?.url || project.image[0]?.formats?.small?.url || project.image[0]?.url;
-  const fullImageUrl = toMediaPath(imageUrl || "");
+  // For next/image, prefer absolute to avoid optimizer fetching same-origin relative URL
+  const fullImageUrl = toAbsoluteMediaUrl(imageUrl || "");
 
   return (
     <TransitionLink
@@ -129,6 +130,7 @@ const ProjectItem = ({ index, project, selectedProject, onMouseEnter, onMouseLea
           height={project.image[0]?.formats?.medium?.height || 200}
           className="w-full object-cover mb-6 aspect-[3/2] object-top rounded-lg"
           loading="lazy"
+          unoptimized
         />
       )}
       <div className="flex gap-2 md:gap-5">
@@ -287,7 +289,7 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
         >
           {projects.map((project) => {
             const imageUrl = project.image[0]?.formats?.large?.url || project.image[0]?.formats?.medium?.url || project.image[0]?.url;
-            const fullImageUrl = toMediaPath(imageUrl || "");
+            const fullImageUrl = toAbsoluteMediaUrl(imageUrl || "");
             
             if (!fullImageUrl) return null;
             
@@ -304,6 +306,7 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
                     "opacity-0": project.documentId !== selectedProject,
                   }
                 )}
+                unoptimized
               />
             );
           })}

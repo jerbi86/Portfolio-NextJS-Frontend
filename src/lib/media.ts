@@ -17,3 +17,15 @@ export function toMediaPath(url?: string | null): string {
     return url;
   }
 }
+
+export function toAbsoluteMediaUrl(url?: string | null): string {
+  if (!url) return "";
+  try {
+    const api = process.env.NEXT_PUBLIC_API_URL;
+    if (!api) return url;
+    const absolute = new URL(url, api);
+    return absolute.href;
+  } catch {
+    return url;
+  }
+}
