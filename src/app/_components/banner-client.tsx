@@ -30,6 +30,38 @@ export default function BannerClient({ fullName, role, shortDescription, email, 
 
   // Reveal child blocks
   useGSAP(() => {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    if (isMobile) {
+      // Mobile: group reveal
+      // Group A: image + greeting + name + role (appears as soon as section enters view)
+      // Group B: description + socials/resume/email (appears after a small scroll)
+      gsap.set('.group-a, .group-b', { y: 20, autoAlpha: 0 });
+
+      // Group A reveal: earlier start so it appears first
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: 'top 85%',
+          end: 'top 45%',
+          scrub: 0.3,
+          invalidateOnRefresh: true,
+        },
+      }).to('.group-a', { y: 0, autoAlpha: 1, ease: 'none', duration: 1 });
+
+      // Group B reveal: only after a tiny scroll movement, over a longer range for smoothness
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: 'top 10%',
+          end: 'top 0%',
+          scrub: 2,
+          invalidateOnRefresh: true,
+        },
+      })
+        .to('.group-b', { y: 0, autoAlpha: 1, ease: 'none', duration: 1 });
+      return;
+    }
+    // Desktop: keep original staggered reveal with scrub
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: containerRef.current,
@@ -44,6 +76,23 @@ export default function BannerClient({ fullName, role, shortDescription, email, 
 
   // Unreveal whole hero grid together
   useGSAP(() => {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    if (isMobile) {
+      // Mobile: grouped fade-out matching grouped reveal
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: 'bottom 65%',
+          end: 'bottom 35%',
+          scrub: 0.3,
+        },
+      })
+        // Fade both groups within the same scroll span to ensure neither is skipped
+        .to('.group-a', { y: -20, autoAlpha: 0, ease: 'none', duration: 1 }, 0)
+        .to('.group-b', { y: -20, autoAlpha: 0, ease: 'none', duration: 1 }, 0.05);
+      return;
+    }
+    // Desktop: original unreveal with scrub
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: containerRef.current,
@@ -56,24 +105,24 @@ export default function BannerClient({ fullName, role, shortDescription, email, 
   }, { scope: containerRef });
 
   return (
-    <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center" ref={containerRef}>
-      <div className="relative md:min-h-[65vh]">
+    <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-center" ref={containerRef}>
+      <div className="relative md:min-h-[65vh] order-2 md:order-1">
         <div className="mx-auto md:mx-0 max-w-2xl md:absolute md:left-0 md:top-1/2 md:-translate-y-1/2">
-          <p className="text-white/70 text-xl sm:text-2xl mb-2 font-bold slide-up-and-fade">Hello, I'm</p>
-          <div className="slide-up-and-fade">
-            <AnimatedGradientText className="text-6xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight leading-tight">
+          <p className="text-white/70 text-base sm:text-2xl mb-1.5 sm:mb-2 font-bold slide-up-and-fade group-a opacity-0 md:opacity-100 translate-y-5 md:translate-y-0">Hello, I'm</p>
+          <div className="slide-up-and-fade group-a opacity-0 md:opacity-100 translate-y-5 md:translate-y-0">
+            <AnimatedGradientText className="text-5xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight leading-tight">
               {fullName || 'Your Name'}
             </AnimatedGradientText>
           </div>
-          <p className="mt-3 text-white/80 text-3xl font-bold slide-up-and-fade">
+          <p className="mt-2 sm:mt-3 text-white/80 text-2xl sm:text-3xl font-bold slide-up-and-fade group-a opacity-0 md:opacity-100 translate-y-5 md:translate-y-0">
             {role ?? 'Your current role'}
           </p>
-          <div className="slide-up-and-fade">
-            <p className="mt-5 text-white/70 text-xl sm:text-2xl max-w-prose">
+          <div className="slide-up-and-fade group-b opacity-0 md:opacity-100 translate-y-5 md:translate-y-0">
+            <p className="mt-4 sm:mt-5 text-white/70 text-base sm:text-2xl max-w-prose">
               {shortDescription ?? 'Short description about you.'}
             </p>
           </div>
-          <div className="mt-8 flex flex-wrap items-center gap-3 slide-up-and-fade">
+          <div className="mt-6 sm:mt-8 flex flex-wrap items-center justify-center md:justify-start gap-2 sm:gap-3 slide-up-and-fade group-b opacity-0 md:opacity-100 translate-y-5 md:translate-y-0">
             {github && (
               <GradientIconLink href={github} label="GitHub">
                 <Github strokeWidth={1.5} />
@@ -89,16 +138,16 @@ export default function BannerClient({ fullName, role, shortDescription, email, 
                 href={resumeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-8 py-4 rounded-full bg-gradient-to-r from-gradient-primary to-gradient-secondary text-white hover:shadow-lg hover:shadow-gradient-primary/50 transition-all text-xl font-bold flex items-center gap-2"
+                className="inline-flex px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-gradient-to-r from-gradient-primary to-gradient-secondary text-white hover:shadow-lg hover:shadow-gradient-primary/50 transition-all text-base sm:text-xl font-bold items-center gap-2"
               >
-                <Download className="w-5 h-5" strokeWidth={2.5} />
+                <Download className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2.5} />
                 Download Resume
               </a>
             )}
             {email && (
               <a
                 href={`mailto:${email}`}
-                className="px-6 py-3 rounded-md bg-neutral-800 text-white hover:bg-neutral-700 transition border border-white/10 md:hidden text-lg"
+                className="px-4 py-2 rounded-md bg-neutral-800 text-white hover:bg-neutral-700 transition border border-white/10 md:hidden text-sm"
               >
                 {email}
               </a>
@@ -107,10 +156,10 @@ export default function BannerClient({ fullName, role, shortDescription, email, 
         </div>
       </div>
 
-      <div className="flex justify-center md:justify-end relative slide-up-and-fade">
+  <div className="flex justify-center md:justify-end relative slide-up-and-fade group-a opacity-0 md:opacity-100 translate-y-5 md:translate-y-0 order-1 md:order-2">
         {imageSrc ? (
           <BackgroundGradient
-            containerClassName="w-full max-w-xs sm:max-w-sm"
+            containerClassName="w-full max-w-[250px] sm:max-w-sm"
             className="rounded-[2rem] bg-background overflow-hidden"
           >
             <Image

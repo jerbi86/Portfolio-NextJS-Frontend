@@ -23,7 +23,7 @@ export default async function Banner() {
   const resumeHref = info?.resume?.url ? toAbsoluteMediaUrl(info.resume.url) : null;
 
   return (
-    <section className="relative w-full flex items-center justify-center mt-16 sm:mt-20 md:mt-28">
+    <section className="relative w-full flex items-center justify-center mt-2 sm:mt-20 md:mt-28">
       <BannerClient
         fullName={info ? `${info.firstName} ${info.lastName}` : "Your Name"}
         role={info?.currentRole}
