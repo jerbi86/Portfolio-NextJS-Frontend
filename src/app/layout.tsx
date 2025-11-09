@@ -21,13 +21,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Static fallback metadata (will be overridden at runtime via generateMetadata())
-export const metadata: Metadata = {
-  title: "Portfolio",
-  description: "Personal portfolio",
-};
-
-// Dynamically generate metadata from Strapi global content
+// Dynamically generate metadata from Strapi global content (no static export allowed with generateMetadata)
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const global = await fetchContentType(
@@ -67,7 +61,11 @@ export async function generateMetadata(): Promise<Metadata> {
     };
   } catch (e) {
     console.error('generateMetadataError', e);
-    return metadata;
+    // Fallback metadata if Strapi request fails
+    return {
+      title: 'Portfolio',
+      description: 'Personal portfolio',
+    };
   }
 }
 
