@@ -15,8 +15,8 @@ export default async function Home() {
       <Banner />
       <AboutMe />
       <Experience />
-      <Education />
       <TechnicalSkills />
+      <Education />
       <Projects />
     </main>
   );
